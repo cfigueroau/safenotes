@@ -1,12 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        REPORT_DIR = 'dependency-check-report'
-    }
-
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
                 git 'https://github.com/cfigueroau/safenotes.git'
             }
@@ -18,23 +14,23 @@ pipeline {
             }
         }
 
-        stage('Análisis de Dependencias') {
+        stage('Análisis de dependencias') {
             steps {
-                bat "mkdir ${env.REPORT_DIR}"
-                bat """dependency-check.bat ^
+                bat 'mkdir dependency-check-report'
+                bat '''
+                    dependency-check.bat ^
                     --project "SafeNotes" ^
                     --scan "." ^
                     --format "HTML" ^
-                    --format "XML" ^
-                    --out "${env.REPORT_DIR}" ^
-                    --enableExperimental"""
+                    --out "dependency-check-report"
+                '''
             }
         }
 
-        stage('Publicar Reporte') {
+        stage('Publicar reporte OWASP') {
             steps {
-                publishHTML([
-                    reportDir: "${env.REPORT_DIR}",
+                publishHTML(target: [
+                    reportDir: 'dependency-check-report',
                     reportFiles: 'dependency-check-report.html',
                     reportName: 'Reporte de Dependencias OWASP'
                 ])
