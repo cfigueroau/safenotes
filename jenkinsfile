@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    tools {
+        // Debe coincidir con el nombre definido en Jenkins
+        dependencyCheck 'OWASP_DC_CLI'
+    }
+
+    stages {
+        stage('Instalar dependencias Node') {
+            steps {
+                bat 'npm install'
+            }
+        }
+
+        stage('Análisis de dependencias') {
+            steps {
+                bat 'if not exist "dependency-check-report" mkdir "dependency-check-report"'
+
+                bat '''
+                    dependency-check.bat ^
+                    --project "SafeNotes" ^
+                    --scan "." ^
+                    --format "HTML" ^
+                    --out "dependency-check-report"
+                '''
+            }
+        }
+
+        stage('Publicar reporte') {
+            steps {
+                publishHTML(target: [
+                    reportDir: 'dependency-check-report',
+                    reportFiles: 'dependency-check-report.html',
+                    reportName: 'OWASP Dependency-Check Report'
+                ])
+            }
+        }
+    }
+}
