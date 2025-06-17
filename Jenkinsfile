@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        dependencyCheck 'OWASP_DC_CLI'
-    }
-
     stages {
         stage('Instalar dependencias') {
             steps {
@@ -15,16 +11,11 @@ pipeline {
         stage('Análisis de Dependencias') {
             steps {
                 bat 'if not exist "dependency-check-report" mkdir "dependency-check-report"'
-                tool name: 'OWASP_DC_CLI'
 
-                dependencyCheck odcInstallation: 'OWASP_DC_CLI', additionalArguments: '''
-                    --project "SafeNotes" ^
-                    --scan "." ^
-                    --format "HTML" ^
-                    --format "XML" ^
-                    --out "dependency-check-report" ^
-                    --enableExperimental
-                '''
+                tool 'OWASP_DC_CLI'  // Esto sí se mantiene para que esté disponible en el entorno
+
+                dependencyCheck odcInstallation: 'OWASP_DC_CLI',
+                    additionalArguments: '''--project "SafeNotes" --scan "." --format "HTML" --format "XML" --out "dependency-check-report" --enableExperimental'''
             }
         }
 
