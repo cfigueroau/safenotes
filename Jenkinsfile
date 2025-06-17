@@ -2,37 +2,29 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/cfigueroau/safenotes.git'
-            }
-        }
-
         stage('Instalar dependencias') {
             steps {
                 bat 'npm install'
             }
         }
 
-        stage('Análisis de dependencias') {
+        stage('AnÃ¡lisis de Dependencias') {
             steps {
-                bat 'mkdir dependency-check-report'
-                bat '''
-                    dependency-check.bat ^
-                    --project "SafeNotes" ^
-                    --scan "." ^
-                    --format "HTML" ^
-                    --out "dependency-check-report"
-                '''
+                bat 'if not exist "dependency-check-report" mkdir "dependency-check-report"'
+
+                tool 'OWASP_DC_CLI'  
+
+                dependencyCheck odcInstallation: 'OWASP_DC_CLI',
+                    additionalArguments: '''--project "SafeNotes" --scan "." --format "HTML" --format "XML" --out "dependency-check-report" --enableExperimental'''
             }
         }
 
-        stage('Publicar reporte OWASP') {
+        stage('Publicar Reporte') {
             steps {
                 publishHTML(target: [
                     reportDir: 'dependency-check-report',
                     reportFiles: 'dependency-check-report.html',
-                    reportName: 'Reporte de Dependencias OWASP'
+                    reportName: 'OWASP Dependency-Check Report'
                 ])
             }
         }
