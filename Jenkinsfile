@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        'OWASP_DC_CLI'
-    }
-
     stages {
         stage('Checkout SCM') {
             steps {
